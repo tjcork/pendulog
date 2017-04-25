@@ -1,0 +1,13 @@
+Output: NC Drill Files
+Type  : NC Drill
+From  : Project [Instrument Breakout.PrjPcb]
+   Generated File[InstrumentBreakout.TXT]
+   Generated File[InstrumentBreakout.DRL]
+   Generated File[InstrumentBreakout.LDP]
+   Generated File[InstrumentBreakout.DRR]
+
+
+Files Generated   : 4
+Documents Printed : 0
+
+Finished Output Generation At 13:52:26 On 14/02/2017

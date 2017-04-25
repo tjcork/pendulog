@@ -1,0 +1,15 @@
+---------------------------------------------------------------------------
+NCDrill File Report For: InstrumentBreakout.PcbDoc   14/02/2017  13:52:26
+---------------------------------------------------------------------------
+
+Layer Pair : Top Layer to Bottom Layer
+ASCII RoundHoles File : InstrumentBreakout.TXT
+EIA File   : InstrumentBreakout.DRL
+
+Tool         Hole Size           Hole Type     Hole Count Plated       Tool Travel
+---------------------------------------------------------------------------
+T1        40mil (1.016mm)          Round          39               5.19 Inch (131.91 mm)
+---------------------------------------------------------------------------
+Totals                                            39               5.19 Inch (131.91 mm)
+
+Total Processing Time (hh:mm:ss) : 00:00:00
