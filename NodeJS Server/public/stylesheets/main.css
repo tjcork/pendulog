@@ -1,0 +1,193 @@
+.bootstrap-select {
+    outline: none !important;
+}
+
+body {
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-color:transparent;
+}
+
+a {
+  color: #00B7FF;
+}
+
+.col-centered{
+    float: none;
+    margin: 0 auto;
+}
+
+.ui-state-focus:focus { outline:none }
+button:focus {outline:0;}
+
+
+/*
+body {
+    background-color: black;
+    background: url("../images/background.jpg") repeat scroll center top;
+	margin: 0px;
+	width:100%;
+	height:100%;
+	
+}
+*/
+
+html { 
+  background: url(../images/background.jpg) repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+
+#content {
+	background-color:transparent;
+}
+
+#pendulumswing {
+	z-index:10;
+}
+
+#brislogo {
+	width:200px;
+	position:absolute;
+	left: 2px;
+	top:6px;
+	z-index:10;
+}
+
+#sync-button {
+	position:absolute;
+	left:220px;
+	top:8px;
+	cursor: pointer;
+}
+
+#preview {
+	margin-top:20px;
+	margin-left:20px;
+	margin-right:20px;
+}
+
+/*
+#title_container {
+	position:relative;
+	top:0px;
+	z-index:-1;
+	display:inline-block;
+	margin: auto
+		
+}
+*/
+#title_container {
+	z-index:20;
+}
+
+#title_container h1 {
+	height:32px;
+	font: normal 55px Helvetica,Arial,sans-serif;
+	color: white;
+	margin:0px;
+	position:relative;
+	z-index:10;
+}
+
+#title_container h4 { 
+	font:normal 13px Helvetica,Arial,sans-serif;
+	color: white;
+	letter-spacing:0.5px;
+	position:relative;
+	top:10px;
+	left:-15px;
+	z-index:10;
+}
+
+#date-dl {
+	position:absolute;
+	right:0px;
+	top:40px;
+	z-index:-3;
+	background-color:transparent;
+	color:transparent;
+	border:transparent;
+}
+
+
+/*
+body { background: #000000 url("../background.jpg") repeat scroll center top; }
+*/
+
+canvas {
+    border: 0;
+    background-color: transparent;
+	position:absolute;
+	z-index:0;
+    left: -200px; top: 0px;
+	pointer-events:none;
+}
+
+
+div, span, p, td {
+	font-family: Arial, sans-serif;
+}
+#chart {
+	display: inline-block;
+}
+#chart path {
+	-webkit-transition: opacity 0.2s linear;
+}
+
+
+#download-db {
+	position: absolute;
+	right: 2px;
+	top: 6px;
+	cursor: pointer;
+	z-index:5;
+}
+
+
+#chart_container {
+	position: absolute;
+	left:0px;
+	bottom:30px;
+	width:100%;
+	padding:0;
+}
+.rickshaw_graph .detail {
+	left: -1000;
+}
+#chart {
+	border: 0px solid #f0f0f0;
+}
+
+#charttitle {
+	display:inline-block;
+    margin-bottom: 0;	
+}
+
+#legend {
+	background-color: transparent;
+	margin-right: 0px;
+	display:inline-block;
+	position:absolute;
+	right:68px;
+}
+#legend .label {
+	color: white;
+}
+#legend .action {
+	color: white;
+	opacity: 0.5;
+}
+#legend ul {
+	padding: 0;
+}
+section {
+	border: none;
+	border-top: 1px solid #eaeaea;
+	padding: 15px 0;
+}
+label.disabled {
+	opacity: 0.4;
+}

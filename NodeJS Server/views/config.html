@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"> 
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	
+	<style>
+		body{
+			color: white;
+			font-family: Arial;
+			background: url(../images/background.jpg) repeat center center fixed; 
+			-webkit-background-size: cover;
+			-moz-background-size: cover;
+			-o-background-size: cover;
+			background-size: cover;
+		}
+		input[type=submit] {
+			color:black;
+		}
+		input[type=number] {
+			color:black;
+		}
+		input[type=checkbox] {
+			margin-right:10px;
+		}
+		select {
+			color:black;
+		}
+		
+	</style>
+
+</head>
+<body>
+<div class="container-fluid">
+<h1 style="text-align:center;padding:50px">Configuration</h1>
+<div id="form_container" class="container" style="width:60%;height:70%;position: absolute;top: calc(50% - 35%);left: calc(50% - 30%);border-style:solid">
+	<form action="/config" method="post">
+	<div class="row" style="padding:10px">
+		<div class="col-sm-4">
+			<h3>Sample Rate</h3>
+			<input type="number" name="samplerate" value="20" min="1" max="30"> Hz<br>
+			<h3>Chunk Size</h3>
+			<input type="number" name="numchunks" value="10" min="1" max="40">
+			
+		</div>
+		<div class="col-sm-4">
+		<h3>Data Fields</h3>
+
+		<!--		
+typedef enum FieldIdentifiers {
+  ID, TI, YW, PT, RL, QW, QX, QY, QZ, AX, AY, AZ, MX, MY, MZ, GX, GY, GZ
+};
+-->
+
+			<input type="checkbox" name="schema" value=0 checked="checked">ID*<br>
+			<input type="checkbox" name="schema" value=1 checked="checked">Time-Stamp*<br>
+			<input type="checkbox" name="schema" value=2 checked="checked">Yaw<br>
+			<input type="checkbox" name="schema" value=3 checked="checked">Pitch<br>
+			<input type="checkbox" name="schema" value=4 checked="checked">Roll<br>
+			<input type="checkbox" name="schema" value=5>W-Quaternion<br>
+			<input type="checkbox" name="schema" value=6>X-Quaternion<br>
+			<input type="checkbox" name="schema" value=7>Y-Quaternion<br>
+			<input type="checkbox" name="schema" value=8>Z-Quaternion<br>
+			<input type="checkbox" name="schema" value=9>X-Accelerometer<br>
+			<input type="checkbox" name="schema" value=10>Y-Accelerometer<br>
+			<input type="checkbox" name="schema" value=11>Z-Accelerometer<br>
+			<input type="checkbox" name="schema" value=12>X-Magnetoscope<br>
+			<input type="checkbox" name="schema" value=13>Y-Magnetoscope<br>
+			<input type="checkbox" name="schema" value=14>Z-Magnetoscope<br>
+			<input type="checkbox" name="schema" value=15>X-Gyroroscope<br>
+			<input type="checkbox" name="schema" value=16>Y-Gyroroscope<br>
+			<input type="checkbox" name="schema" value=17>Z-Gyroroscope<br>
+		</div>
+		<div class="col-sm-4">
+		<h3>Mode</h3>
+		<select name="mode">
+			<option value="Normal">Normal</option>
+			<option value="Low Power">Low Power</option>
+		</select>
+		<h3>Euler Calculations</h3>
+			<input type="radio" name="eulercalc" value="true" checked="checked">True<br>
+			<input type="radio" name="eulercalc" value="false">False<br>
+		<h3>Error Re-send</h3>
+			<input type="radio" name="errorresend" value="true">True<br>
+			<input type="radio" name="errorresend" value="false" checked="checked">False<br>
+		</div>
+	</div>
+	<div class="row" style="text-align:center">
+		<input type="submit" value="Submit">
+	</div>
+
+	</form>
+</div>
+</div>
+</body>
+</html>
+

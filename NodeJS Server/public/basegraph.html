@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Pendulog Graph</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="shortcut icon" type="image/png" href="/favicon.ico"/>
+		
+	
+	
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link type="text/css" rel="stylesheet" href="stylesheets/graph.css">
+	<link type="text/css" rel="stylesheet" href="stylesheets/detail.css">
+	<link type="text/css" rel="stylesheet" href="stylesheets/legend.css">
+	<link type="text/css" rel="stylesheet" href="stylesheets/extensions.css">
+	
+	<script src="./javascripts/HackTimer.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	
+	<script src="javascripts/d3.min.js"></script>
+	<script src="javascripts/rickshaw.js"></script>
+</head>
+<body>
+
+<div id="content">
+	
+	<div id="chart"></div>
+</div>
+
+<script>
+
+$(document).ready(function(){
+    // Connect to our node/websockets server
+    var ws = new WebSocket("ws://big.cs.bris.ac.uk:3000");
+	var buffer = [];
+	var sampleFrequency=20;
+	var initialBuffer=10;
+
+/*	
+	// instantiate our graph!
+	var graph = new Rickshaw.Graph( {
+		element: document.getElementById("chart"),
+		width: 900,
+		height: 500,
+		renderer: 'line',
+		
+		series: new Rickshaw.Series.FixedDuration([{ name: 'YW' }, {name:'PT'}, {name:'RL'}], 'spectrum2001', {
+			timeBase: 0,
+			timeInterval: 1000/sampleFrequency,
+			maxDataPoints: 100
+		}) 
+	} );
+
+	graph.render();
+	
+*/
+	var dataYW = []
+	var dataPT = []
+	var dataRL = []
+
+ 
+    // Initial set of data, loop through and add to list
+    ws.onmessage = function(event) {
+	
+		var msg = JSON.parse(event.data);
+		switch(msg.type) {
+			case "initial points":
+		
+		
+				for (var i = msg.data.length-1; i >= msg.buffer; i--) {
+					dataYW.push({ y: msg.data[i].YW, x:msg.data[i].TM});
+					dataPT.push({ y: msg.data[i].PT, x:msg.data[i].TM});
+					dataRL.push({ y: msg.data[i].RL, x:msg.data[i].TM});
+				}
+				
+					
+				var graph = new Rickshaw.Graph( {
+					element: document.querySelector("#chart"),
+					width: 900,
+					height: 500,
+					renderer: 'line',
+					min:-180,
+					max:180,
+					stroke: true,
+					series: [ {	
+							data: dataYW,
+							color: 'steelblue'
+
+					}, {    
+							data: dataPT,
+							color: 'lightblue'
+					} ]                    
+				} );			
+				
+				graph.render();
+	
+				
+				for(var i=msg.buffer-1; i >=0; i--) {
+					buffer.push(msg.data[i]);
+				}
+				
+/*				
+				
+				for (var i = msg.buffer; i < msg.data.length; i++){
+  						var data = { 'YW': msg.data[i].YW, 'PT': msg.data[i].PT, 'RL': msg.data[i].RL };
+						graph.series.addData(data);
+						console.log(data);
+				}
+*/
+				
+				dataupdate = setInterval( function() {
+					if (buffer.length > 0) {
+							var buf = buffer.shift();
+							dataYW.shift();
+							dataPT.shift();
+							dataRL.shift();
+							
+							dataYW.push({ y: buf.YW, x:buf.TM});
+							dataPT.push({ y: buf.PT, x:buf.TM});
+							dataRL.push({ y: buf.RL, x:buf.TM});
+							
+							//graph.series
+							graph.update();	
+						
+						
+					}
+				},1000/sampleFrequency);
+				
+				
+      			break;
+					
+			case 'chunk':
+				var lastID=msg.data[0].ID;
+				for (var i = 0; i < msg.numChunks; i++) {
+					buffer.push(msg.data[i]);
+				}
+				break;
+			
+		}
+	}
+		
+		
+	ws.onopen = function (event) {
+	
+	
+	};
+
+	
+	ws.onclose(function() {
+		clearInterval(dataupdate);
+		console.log('closed');
+	});
+
+	
+})
+
+
+
+</script>
+
+
+</head>
+<body>
+
+</body>

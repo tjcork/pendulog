@@ -1,0 +1,407 @@
+<!doctype html>
+<head>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+	<link type="text/css" rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/ui-darkness/jquery-ui.css">
+	<script src="javascripts/d3.v3.js"></script>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script>
+		jQuery.noConflict();
+	</script>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	
+
+	<script src="javascripts/rickshaw/Rickshaw.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Class.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Compat.ClassList.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Renderer.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Renderer.Area.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Renderer.Line.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Renderer.Bar.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Renderer.ScatterPlot.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Renderer.Stack.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.RangeSlider.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.RangeSlider.Preview.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.HoverDetail.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Annotate.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Legend.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Axis.Time.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Behavior.Series.Toggle.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Behavior.Series.Order.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Behavior.Series.Highlight.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Smoother.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Fixtures.Time.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Fixtures.Time.Local.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Fixtures.Number.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Fixtures.RandomData.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Fixtures.Color.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Color.Palette.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Axis.Y.js"></script>
+
+	<link type="text/css" rel="stylesheet" href="stylesheets/graph.css">
+	<link type="text/css" rel="stylesheet" href="stylesheets/detail.css">
+	<link type="text/css" rel="stylesheet" href="stylesheets/legend.css">
+	
+	
+	
+<!-- Include Date Range Picker -->
+<script type="text/javascript" src="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css">
+
+	<link type="text/css" rel="stylesheet" href="stylesheets/main.css">
+	
+	
+</head>
+<body>
+
+
+<div class="container-fluid" id="content">
+	<div class="row" id="heading">
+		<div class="col-sm-4">
+			<img src="images/bristol.png" id="brislogo">
+			<img src="images/sync-solid_dis.png" id="sync-button">
+		</div>
+		<div class="col-sm-4" style="text-align:center">
+			<div id="title_container">
+				<div><h1>Pendulog</h1></div>
+				<div><h4> An IoT pendulum motion logger</h4></div>	
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div id="legend"></div>	
+			<img src="images/download-database_64.png" id="download-db">
+			<input type="text" name="date-s" id="date-dl">
+		</div>
+	</div>
+	<div>
+		<canvas id="pendulumswing" width="992" height="700"></canvas>
+	</div>
+
+
+	<div id="chart_container">
+			<div id="chart"></div>
+			<div id="preview_container" style="margin:0 auto">
+				<div id="preview"></div>
+			</div>
+		</div>
+	
+
+
+
+</div>
+
+<script>
+
+var HttpClient = function() {
+    this.get = function(aUrl, aCallback) {
+        var anHttpRequest = new XMLHttpRequest();
+        anHttpRequest.onreadystatechange = function() { 
+            if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+                aCallback(anHttpRequest.responseText);
+        }
+
+        anHttpRequest.open( "GET", aUrl, true );            
+        anHttpRequest.send( null );
+    }
+}
+
+var ws = new WebSocket("ws://big.cs.bris.ac.uk:3000");
+var buffer = [];
+var sampleFrequency=20;
+var initialBuffer=10;
+var synced=false;
+
+//-----------------------swinging pendulum-------------------------------------
+     window.requestAnimFrame = (function(callback) {
+        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+        function(callback) {
+          window.setTimeout(callback, 1000 / 20);
+        };
+      })();
+
+      function drawPendulum(myPendulum, context) {
+        context.save();
+        context.translate(canvas.width/2, -500);
+        context.rotate(myPendulum.angle*Math.PI/180);
+        context.drawImage(myPendulum,-myPendulum.width/2, 480);
+        context.restore();        
+      }
+      
+      
+      function animate(myPendulum, canvas, context, startTime) {
+        // update
+        var time = (new Date()).getTime() - startTime;
+        var amplitude = 150;
+        var angamplitude=8;
+
+        // in ms
+        var period = 2000;
+        var nextAng= angamplitude * Math.sin(time * 2 * Math.PI / period);
+		if (synced) {
+			if (buffer.length > 0) {
+				var ang = buffer[0].PT
+				myPendulum.angle = Math.abs(ang) < 10 ? ang : Math.sign(ang) * 10;
+			}
+		}
+		else
+			myPendulum.angle=nextAng
+
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // draw
+        
+        drawPendulum(myPendulum, context);
+
+        // request new frame
+        requestAnimFrame(function() {
+          animate(myPendulum, canvas, context, startTime);
+        });
+      }
+      
+      var canvas = document.getElementById('pendulumswing');
+      var context = canvas.getContext('2d');
+      var myPendulum = new Image();
+		
+      myPendulum.angle=0;
+      
+      myPendulum.onload = function() {
+        context.drawImage(myPendulum, canvas.width/2, 0);
+        
+      };
+      myPendulum.src = './images/pendulum.png';
+      
+      
+      var startTime = (new Date()).getTime();
+      animate(myPendulum, canvas, context, startTime);
+	  
+//----------------------------------------------------------------------------
+	  
+	  
+//-------------------------data----------------------------------------------
+
+var seriesData = [ [], [], [] ];
+seriesData[0]=[{x:100000,y:20.0}]
+seriesData[1]=[{x:100000,y:20.0}]
+seriesData[2]=[{x:100000,y:20.0}]
+
+
+var startstream=false;
+
+ws.onmessage = function(event) {
+	
+	var msg = JSON.parse(event.data);
+	switch(msg.type) {
+	
+	case "initial points":
+			
+		for (var i = msg.data.length-1; i >= msg.buffer; i--) {
+			seriesData[0].push({ y: msg.data[i].YW, x:msg.data[i].TM});
+			seriesData[1].push({ y: msg.data[i].PT, x:msg.data[i].TM});
+			seriesData[2].push({ y: msg.data[i].RL, x:msg.data[i].TM});
+		}
+			
+		
+		for(var i=msg.buffer-1; i >=0; i--) {
+			buffer.push(msg.data[i]);
+		}
+		
+		
+		setInterval( function() {
+			//random.removeData(seriesData);
+			if (buffer.length > 0) {
+				var buf = buffer.shift();
+				console
+				seriesData.forEach( function(series) {
+						series.shift();
+				} );
+
+				seriesData[0].push({ y: buf.YW, x:Math.floor(buf.TM )});
+				seriesData[1].push({ y: buf.PT, x:Math.floor(buf.TM)});
+				seriesData[2].push({ y: buf.RL, x:Math.floor(buf.TM)});
+							
+				graph.update();
+			}
+		}, 50 );
+		startstream=true;
+				
+		break;
+	
+	
+		case 'chunk':
+			if (startstream===true) {
+				for (var i = 0; i < msg.numChunks; i++) {
+					buffer.push(msg.data[i]);
+				}
+				if (buffer.length > 30) buffer = buffer.slice(-10);
+			}
+			break;
+	}
+}
+
+	  
+//-------------------------graph----------------------------------------------
+
+
+var palette = new Rickshaw.Color.Palette( { scheme: 'colorwheel' } );
+
+// instantiate our graph!
+
+var graph = new Rickshaw.Graph( {
+	element: document.getElementById("chart"),
+	width: window.innerWidth - 2,//0.66,
+	height: window.innerHeight * 0.85,//0.75,
+	renderer: 'line',
+	min:-180,
+	max:180,
+	stroke: true,
+	preserve: true,
+	series: [
+		{
+			color: palette.color(),
+			data: seriesData[0],
+			name: 'Yaw'
+		}, {
+			color: palette.color(),
+			data: seriesData[1],
+			name: 'Pitch'
+		}, {
+			color: palette.color(),
+			data: seriesData[2],
+			name: 'Roll'
+		}
+	]
+} );
+
+graph.render();
+
+var resize = function() {
+	graph.configure({
+		width: window.innerWidth - 2,//0.66,
+		height: window.innerHeight * 0.85//0.75
+	});
+	graph.render();
+}
+
+window.addEventListener('resize', resize); 
+
+
+var preview = new Rickshaw.Graph.RangeSlider( {
+	graph: graph,
+	width: window.innerWidth * 0.9,
+	element: document.getElementById('preview')
+} );
+
+
+var hoverDetail = new Rickshaw.Graph.HoverDetail( {
+	graph: graph,
+	xFormatter: function(x) {
+		return new Date(x).toString();
+	},
+	yFormatter: function(y){return Number(y).toPrecision(3);}
+	
+} );
+
+
+var legend = new Rickshaw.Graph.Legend( {
+	graph: graph,
+	element: document.getElementById('legend')
+
+} );
+
+
+var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
+	graph: graph,
+	legend: legend
+} );
+
+var order = new Rickshaw.Graph.Behavior.Series.Order( {
+	graph: graph,
+	legend: legend
+} );
+
+var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight( {
+	graph: graph,
+	legend: legend
+} );
+
+
+var ticksTreatment = 'glow';
+
+var xAxis = new Rickshaw.Graph.Axis.Time( {
+	graph: graph,
+	ticksTreatment: ticksTreatment,
+	timeFixture: new Rickshaw.Fixtures.Time.Local()
+} );
+
+xAxis.render();
+
+var yAxis = new Rickshaw.Graph.Axis.Y( {
+	graph: graph,
+	tickFormat: function(y){return y.toFixed(0) + '°'},
+	ticksTreatment: ticksTreatment
+} );
+
+yAxis.render();
+
+$=jQuery
+jQuery(function() {
+    $('input[name="date-s"]').daterangepicker({
+		"timePicker": true,
+		"startDate": "19/03/2017",
+		"endDate": "25/03/2017",
+		"opens": "left",
+		"locale": {
+			"format": "DD/MM/YYYY",
+			"separator": " - ",
+			"applyLabel": "Download",
+			"cancelLabel": "Cancel",
+			"fromLabel": "From",
+			"toLabel": "To"
+        }
+	}, function(start, end, label) {
+		location.href = '/download/dl?start=' + start.valueOf() + '&end=' + end.valueOf();
+});
+
+
+
+
+});
+$('#download-db').click(function () {
+    $('#date-dl').data("daterangepicker").show();
+});
+
+
+
+$('#sync-button')
+	.click(function () {
+		if (!synced)
+			$(this).attr("src", "images/sync-solid_en.png");
+		else
+			$(this).attr("src", "images/sync-solid_dis.png");
+		synced=!synced;
+	})
+	.mouseover(function() { 
+		if (!synced)
+			$(this).attr("src", "images/sync-solid_en.png");
+		else
+			$(this).attr("src", "images/sync-solid_dis.png");
+	})
+	.mouseout(function() {
+		if (!synced)
+			$(this).attr("src", "images/sync-solid_dis.png");
+		else
+			$(this).attr("src", "images/sync-solid_en.png");
+	});
+
+
+
+
+</script>
+
+</body>

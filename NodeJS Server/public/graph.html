@@ -1,0 +1,242 @@
+
+<!doctype html>
+<head>
+	<link type="text/css" rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css">
+	<link type="text/css" rel="stylesheet" href="stylesheets/graph.css">
+	<link type="text/css" rel="stylesheet" href="stylesheets/detail.css">
+	<link type="text/css" rel="stylesheet" href="stylesheets/legend.css">
+	<link type="text/css" rel="stylesheet" href="stylesheets/extensions.css?v=2">
+	<link type="text/css" rel="stylesheet" href="stylesheets/main.css">
+	<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+	
+	<script src="javascripts/d3.v3.js"></script>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+	<script>
+		jQuery.noConflict();
+	</script>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.15/jquery-ui.min.js"></script>
+
+	<script src="javascripts/rickshaw/Rickshaw.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Class.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Compat.ClassList.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Renderer.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Renderer.Area.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Renderer.Line.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Renderer.Bar.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Renderer.ScatterPlot.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Renderer.Stack.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.RangeSlider.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.RangeSlider.Preview.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.HoverDetail.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Annotate.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Legend.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Axis.Time.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Behavior.Series.Toggle.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Behavior.Series.Order.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Behavior.Series.Highlight.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Smoother.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Fixtures.Time.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Fixtures.Time.Local.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Fixtures.Number.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Fixtures.RandomData.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Fixtures.Color.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Color.Palette.js"></script>
+	<script src="javascripts/rickshaw/Rickshaw.Graph.Axis.Y.js"></script>
+
+	
+</head>
+<body>
+
+<div id="content">
+
+		<div class="row">
+			<div class="one-third column">
+				<h1 id="charttitle">Live Data</h1>
+			</div>
+			<div class="two-thirds column">
+				<div id="legend"></div>	
+			</div>
+		</div>
+		<div id="chart_container">
+			<div id="chart"></div>
+			<div id="preview"></div>
+		</div>
+
+</div>
+
+<script>
+var ws = new WebSocket("ws://big.cs.bris.ac.uk:3000");
+var buffer = [];
+var sampleFrequency=20;
+var initialBuffer=10;
+
+var seriesData = [ [], [], [] ];
+seriesData[0]=[{x:100000,y:20.0}]
+seriesData[1]=[{x:100000,y:20.0}]
+seriesData[2]=[{x:100000,y:20.0}]
+
+var palette = new Rickshaw.Color.Palette( { scheme: 'colorwheel' } );
+
+// instantiate our graph!
+
+var graph = new Rickshaw.Graph( {
+	element: document.getElementById("chart"),
+	height: window.innerHeight * 0.75,
+	width: window.innerWidth * 0.75,
+	renderer: 'line',
+	min:-180,
+	max:180,
+	stroke: true,
+	preserve: true,
+	series: [
+		{
+			color: palette.color(),
+			data: seriesData[0],
+			name: 'Yaw'
+		}, {
+			color: palette.color(),
+			data: seriesData[1],
+			name: 'Pitch'
+		}, {
+			color: palette.color(),
+			data: seriesData[2],
+			name: 'Roll'
+		}
+	]
+} );
+
+graph.render();
+
+var resize = function() {
+	graph.configure({
+		width: window.innerWidth * 0.75,
+		height: window.innerHeight * 0.75
+	});
+	graph.render();
+}
+
+window.addEventListener('resize', resize); 
+
+
+var preview = new Rickshaw.Graph.RangeSlider( {
+	graph: graph,
+	element: document.getElementById('preview'),
+} );
+
+var hoverDetail = new Rickshaw.Graph.HoverDetail( {
+	graph: graph,
+	xFormatter: function(x) {
+		return new Date(x).toString();
+	},
+	yFormatter: function(y){return Number(y).toPrecision(3);}
+	
+} );
+
+
+var legend = new Rickshaw.Graph.Legend( {
+	graph: graph,
+	element: document.getElementById('legend')
+
+} );
+
+
+var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
+	graph: graph,
+	legend: legend
+} );
+
+var order = new Rickshaw.Graph.Behavior.Series.Order( {
+	graph: graph,
+	legend: legend
+} );
+
+var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight( {
+	graph: graph,
+	legend: legend
+} );
+
+
+var ticksTreatment = 'glow';
+
+var xAxis = new Rickshaw.Graph.Axis.Time( {
+	graph: graph,
+	ticksTreatment: ticksTreatment,
+	timeFixture: new Rickshaw.Fixtures.Time.Local()
+} );
+
+xAxis.render();
+
+var yAxis = new Rickshaw.Graph.Axis.Y( {
+	graph: graph,
+	tickFormat: function(y){return y.toPrecision(3)},
+	ticksTreatment: ticksTreatment
+} );
+
+yAxis.render();
+
+var start=false;
+
+ws.onmessage = function(event) {
+	
+	var msg = JSON.parse(event.data);
+	switch(msg.type) {
+	
+	case "initial points":
+			
+		for (var i = msg.data.length-1; i >= msg.buffer; i--) {
+			seriesData[0].push({ y: msg.data[i].YW, x:msg.data[i].TM});
+			seriesData[1].push({ y: msg.data[i].PT, x:msg.data[i].TM});
+			seriesData[2].push({ y: msg.data[i].RL, x:msg.data[i].TM});
+		}
+			
+		
+		for(var i=msg.buffer-1; i >=0; i--) {
+			buffer.push(msg.data[i]);
+		}
+		
+		
+		setInterval( function() {
+			//random.removeData(seriesData);
+			if (buffer.length > 0) {
+				var buf = buffer.shift();
+				
+				seriesData.forEach( function(series) {
+						series.shift();
+				} );
+
+				seriesData[0].push({ y: buf.YW, x:Math.floor(buf.TM )});
+				seriesData[1].push({ y: buf.PT, x:Math.floor(buf.TM)});
+				seriesData[2].push({ y: buf.RL, x:Math.floor(buf.TM)});
+							
+				graph.update();
+			}
+		}, 50 );
+		start=true;
+				
+		break;
+	
+	
+		case 'chunk':
+			if (start===true) {
+				for (var i = 0; i < msg.numChunks; i++) {
+					buffer.push(msg.data[i]);
+				}
+			}
+			break;
+	}
+}
+
+var previewXAxis = new Rickshaw.Graph.Axis.Time({
+	graph: preview.previews[0],
+	timeFixture: new Rickshaw.Fixtures.Time.Local(),
+	ticksTreatment: ticksTreatment
+});
+
+previewXAxis.render();
+
+</script>
+
+</body>

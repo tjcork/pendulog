@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Pendulog Dashboard</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="shortcut icon" type="image/png" href="/favicon.ico"/>
+		
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="./javascripts/HackTimer.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<script>
+$(document).ready(function(){
+    // Connect to our node/websockets server
+    var ws = new WebSocket("ws://178.62.89.40:3000");
+	var buffer = [];
+	var sampleFrequency=20;
+	var initialBuffer=10;
+	var lastID = 0;
+ 
+    // Initial set of data, loop through and add to list
+    ws.onmessage = function(event) {
+	
+		var msg = JSON.parse(event.data);
+		switch(msg.type) {
+			case "initial points":
+				var html = '<tbody><tr><th>ID</th><th>Time</th><th>Yaw</th><th>Pitch</th><th>Roll</th></tr>'
+				for(var i=0; i < msg.buffer; i++) {
+					buffer.push(msg.data[msg.buffer-i-1]);
+				}
+				for (var i = msg.buffer; i < msg.data.length; i++){
+					// We store html as a var then add to DOM after for efficiency
+					html += '<tr><td>' + msg.data[i].ID + '</td><td>' + msg.data[i].TM + '</td><td>' + msg.data[i].YW + '</td><td>' + msg.data[i].PT + '</td><td>' + msg.data[i].RL + '</td></tr>'
+				}
+				html += '</tbody>';
+
+				$('#datatable').html(html)
+				//lastID=buffer[buffer.length-1].I
+      			break;
+			
+			case 'data':
+				$('#datatable > tbody > tr:eq(1)').before('<tr><td>' + msg.ID + '</td><td>' + msg.TM + '</td><td>' + msg.YW + '</td><td>' + msg.PT + '</td><td>' + msg.RL + '</td></tr>');
+				break;
+			
+			case 'chunk':
+				var lastID=msg.data[0].ID;
+				for (var i = 0; i < msg.numChunks; i++) {
+					buffer.push(msg.data[i]);
+					curID=msg.data[i].ID;
+					var numMissing = curID-lastID-1;
+					for (var x=1; x <= numMissing; x++) {
+						$('#missingPackets').append((lastID*1+x) + ', ');			
+					};
+					lastID=curID;
+				}
+				break;
+				
+			case 'users connected':
+				$('#usersConnected').html('<strong>Connected</strong><br>Users connected: ' + msg.socketconn + '</p>');
+		
+		
+		}
+	}
+		
+		
+	ws.onopen = function (event) {
+
+
+		dataupdate = setInterval( function() {
+			if (buffer.length > 0) {
+				var data = buffer.shift();
+				var html = '<tbody><tr><th>ID</th><th>Time</th><th>Yaw</th><th>Pitch</th><th>Roll</th></tr>';
+
+				for (var i = 0; i < buffer.length; i++){
+					// We store html as a var then add to DOM after for efficiency
+					html += '<tr><td>' + buffer[i].ID + '</td><td>' + buffer[i].TM + '</td><td>' + buffer[i].YW + '</td><td>' + buffer[i].PT + '</td><td>' + buffer[i].RL + '</td></tr>'
+				}
+				html += '</tbody>';
+
+				$('#buffertable').html(html);
+				
+				$('#datatable > tbody > tr:eq(1)').before('<tr><td>' + data.ID + '</td><td>' + data.TM + '</td><td>' + data.YW + '</td><td>' + data.PT + '</td><td>' + data.RL + '</td></tr>');		
+				$('#datatable > tbody > tr:last').remove();
+			}
+		},1000/sampleFrequency);
+	}
+
+	ws.onclose = function() {
+		clearInterval(dataupdate);
+		$('#usersConnected').html('<strong>Disconnected</strong>');
+	};
+
+	
+})
+
+
+</script>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-5">
+			<div class="table-responsive">
+				<table class="table table-condensed" id="datatable"></table>
+			</div>
+		</div>
+		<div class="col-sm-2">
+			<br>
+			<div class="well" id="usersConnected">'<strong>Disconnected</strong>'
+			</div>
+			<br>
+			<h3 style="align:center">Buffer packets:</h3>
+			<div class="alert alert-success">
+				<strong>Saved:  </strong>
+			</div>
+			<div class="alert alert-warning" id="missingPackets">
+				<strong>Missing: </strong>
+			</div>
+			<div class="alert alert-danger">
+			  <strong>Missed:   </strong> 
+			</div>
+		</div>
+		<div class="col-sm-5">
+
+			<div class="table-responsive">
+				<table class="table table-condensed" id="buffertable"></table>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+</html>

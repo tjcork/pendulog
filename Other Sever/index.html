@@ -1,0 +1,235 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
+        <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
+        <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
+        <link rel="manifest" href="manifest.json">
+        <link rel="mask-icon" href="safari-pinned-tab.svg">
+        <meta name="theme-color" content="#ffffff">
+        <!-- Place favicon.ico in the root directory -->
+
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/styles.css">
+        <script src="js/vendor/modernizr-2.8.3.min.js"></script>
+    </head>
+    <body onload="startPendulum()">
+        <!--[if lt IE 8]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+        <!-- Add your site or application content here -->
+    <!--    <div class="root">
+        <div id="pendulum" class="wb_element"><img alt="pendulum" src="pendulum.png"></div>
+       --> <div id="title" class="wb_element" style=" line-height: normal;"><h5 class="wb-stl-subtitle">Pendulog</h5></div>
+        <div id="subtitle" class="wb_element" style=" line-height: normal;"><p class="wb-stl-normal"> An IoT pendulum motion logger</p></div>
+       
+           
+        
+    <canvas id="myCanvas" width="992" height="800"></canvas>
+    <script>
+      /* 
+       * 
+      var canvas = document.getElementById('myCanvas');
+      var context = canvas.getContext('2d');
+      var imageObj = new Image();
+     
+      context.translate(canvas.width / 2, 0);
+
+      // rotate 45 degrees clockwise
+      context.rotate(Math.PI / -8);
+      context.translate(0, 0);
+      
+      imageObj.onload = function() {
+        context.drawImage(imageObj, 0, 0);
+      };
+      imageObj.src = 'pendulum.png';
+      */
+      
+      
+      window.requestAnimFrame = (function(callback) {
+        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+        function(callback) {
+          window.setTimeout(callback, 1000 / 20);
+        };
+      })();
+
+      function drawPendulum(myPendulum, context) {
+        context.drawImage(myPendulum, myPendulum.xpos, 0);
+      }
+      
+      
+      function animate(myPendulum, canvas, context, startTime) {
+        // update
+        var time = (new Date()).getTime() - startTime;
+        var amplitude = 150;
+
+        // in ms
+        var period = 2000;
+        var centerX = canvas.width / 2 - myPendulum.width / 2;
+        var nextX = amplitude * Math.sin(time * 2 * Math.PI / period) + centerX;
+        myPendulum.xpos = nextX;
+
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // draw
+        
+        drawPendulum(myPendulum, context);
+
+        // request new frame
+        requestAnimFrame(function() {
+          animate(myPendulum, canvas, context, startTime);
+        });
+      }
+      
+      var canvas = document.getElementById('myCanvas');
+      var context = canvas.getContext('2d');
+      var myPendulum = new Image();
+      
+      myPendulum.onload = function() {
+        context.drawImage(myPendulum, 0, 0);
+      };
+      myPendulum.src = 'pendulum.png';
+      
+      // wait one second before starting animation
+      setTimeout(function() {
+        var startTime = (new Date()).getTime();
+        animate(myPendulum, canvas, context, startTime);
+      }, 1000);
+      
+      
+      
+      </script>
+      
+      
+      
+      
+      
+      
+      
+      <!--
+        <script>
+        var myPendulum;
+        var imageObj = new Image();
+
+      imageObj.onload = function() {
+        context.drawImage(imageObj, 69, 50);
+      };
+      imageObj.src = 'pendulum.png';
+
+        function startPendulum() {
+            myPendulm = new component(50, 50, "pendulum.png", 20, 200, "image");
+            myPendulumArea.start();
+        }
+
+        var myPendulumArea = {
+            canvas : document.createElement("canvas"),
+            start : function() {
+                this.canvas.width = 480;
+                this.canvas.height = 270;
+                this.context = this.canvas.getContext("2d");
+                document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+                this.frameNo = 0;
+                this.interval = setInterval(updateGameArea, 50);
+                },
+            clear : function() {
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            },
+            stop : function() {
+                clearInterval(this.interval);
+            }
+        }
+
+        function component(width, height, color, x, y, type) {
+            this.type = type;
+            if (type == "image") {
+                this.image = new Image();
+                this.image.src = color;
+            }
+            this.width = width;
+            this.height = height;
+            this.speedX = 0;
+            this.speedY = 0;    
+            this.x = x;
+            this.y = y;    
+            this.update = function() {
+                ctx = myPendulumArea.context;
+                if (type == "image") {
+                    ctx.drawImage(this.image, 
+                        this.x, 
+                        this.y,
+                        this.width, this.height);
+                } else {
+                    ctx.fillStyle = color;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                }
+            }
+            this.newPos = function() {
+                this.x += this.speedX;
+                this.y += this.speedY;        
+            }
+        }
+
+        function updateGameArea() {
+            myPendulumArea.clear();
+            myPendulum.newPos();
+            myPendulum.update();
+        }
+
+        function moveup() {
+            myPendulum.speedY = -1; 
+        }
+
+        function movedown() {
+            myPendulum.speedY = 1; 
+        }
+
+        function moveleft() {
+            myPendulum.speedX = -1; 
+        }
+
+        function moveright() {
+            myPendulum.speedX = 1; 
+        }
+
+        function clearmove() {
+            myPendulum.speedX = 0; 
+            myPendulum.speedY = 0; 
+        }
+        </script>
+        
+        
+        
+        <div style="text-align:center;width:480px;">
+  <button onmousedown="moveup()" onmouseup="clearmove()" ontouchstart="moveup()">UP</button><br><br>
+  <button onmousedown="moveleft()" onmouseup="clearmove()" ontouchstart="moveleft()">LEFT</button>
+  <button onmousedown="moveright()" onmouseup="clearmove()" ontouchstart="moveright()">RIGHT</button><br><br>
+  <button onmousedown="movedown()" onmouseup="clearmove()" ontouchstart="movedown()">DOWN</button>
+</div>
+        
+        -->
+
+        <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.12.0.min.js"><\/script>')</script>
+        <script src="js/plugins.js"></script>
+        <script src="js/main.js"></script>
+
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='https://www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-88075869-1','auto');ga('send','pageview');
+        </script>
+    </body>
+</html>

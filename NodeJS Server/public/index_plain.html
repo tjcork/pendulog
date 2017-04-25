@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Pendulog</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<script src="./javascripts/HackTimer.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  
+		<link rel="shortcut icon" type="image/png" href="/favicon.ico"/>
+		<link rel="stylesheet" type="text/css" href="stylesheets/main.css">
+        
+        
+    </head>
+    <body >
+		<div class="container-fluid">	
+			<div>
+				<canvas id="pendulumswing" width="992" height="700"></canvas>
+			</div>
+			<div>
+				<div>
+					<h1 >Pendulog</h1>
+				</div>
+				<div>
+					<h4> An IoT pendulum motion logger</h4>
+				</div>	
+			</div>
+
+		</div>
+
+    <script>
+    
+	$(function() {
+		var ws = new WebSocket("ws://big.cs.bris.ac.uk:3000");
+		var buffer = [];
+		var sampleFrequency=20;
+		var initialBuffer=10;
+		var start=false;
+		
+		ws.onopen = function() {
+			start=true;
+		};
+		
+		ws.onmessage = function(event) {
+	
+			var msg = JSON.parse(event.data);
+			switch(msg.type) {
+			
+				case 'chunk':
+					if (start===true) {
+						for (var i = 0; i < msg.numChunks; i++) {
+							buffer.push(msg.data[i]);
+						}
+					}
+					break;
+			}
+		}
+	
+      window.requestAnimFrame = (function(callback) {
+        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+        function(callback) {
+          window.setTimeout(callback, 1000 / 20);
+        };
+      })();
+
+      function drawPendulum(myPendulum, context) {
+        context.save();
+        context.translate(canvas.width/2, -500);
+        context.rotate(myPendulum.angle*Math.PI/180);
+        context.drawImage(myPendulum,-myPendulum.width/2, 480);
+        context.restore();        
+      }
+      
+      
+      function animate(myPendulum, canvas, context, startTime) {
+        // update
+        var time = (new Date()).getTime() - startTime;
+        var amplitude = 150;
+        var angamplitude=8;
+
+        // in ms
+        var period = 2000;
+        var nextAng= angamplitude * Math.sin(time * 2 * Math.PI / period);
+		if (buffer.length > 0) {
+			var buf = buffer.shift();
+			myPendulum.angle = buf.YW;
+		}
+
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // draw
+        
+        drawPendulum(myPendulum, context);
+
+        // request new frame
+        requestAnimFrame(function() {
+          animate(myPendulum, canvas, context, startTime);
+        });
+      }
+      
+      var canvas = document.getElementById('pendulumswing');
+      var context = canvas.getContext('2d');
+      var myPendulum = new Image();
+      myPendulum.angle=0;
+      
+      myPendulum.onload = function() {
+        context.drawImage(myPendulum, canvas.width/2, 0);
+        
+      };
+      myPendulum.src = './images/pendulum.png';
+      
+      
+      var startTime = (new Date()).getTime();
+      animate(myPendulum, canvas, context, startTime);
+      
+          
+}); 
+      
+</script>
+      
+ 
+
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='https://www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-88075869-1','auto');ga('send','pageview');
+        </script>
+    </body>
+</html>

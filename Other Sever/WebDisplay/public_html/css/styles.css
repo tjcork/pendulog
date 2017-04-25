@@ -1,0 +1,72 @@
+body { background: #000000 url("../background.jpg") repeat scroll center top; }
+
+/*
+
+html, body	{ /* height: 100%;  height: auto; padding: 0; }
+.root		{ margin: 0px auto; width: 1003px; min-height: 200px; }
+.vbox		{ width: 100%; float: none; position: relative; }
+.hbox		{ min-height: 100%; float: left; position: relative; }
+
+a img		{ border: none; }
+
+.clear	{
+	display: block; float: none; clear: both; border: none; padding: 0px; margin: 0px;
+	visibility: hidden; font-size: 1px; line-height: 1px;
+}
+
+.wb-state-highlight	{ background: url("../img/hlight_bg.png") repeat left top; }
+
+.wb_container	{ position: relative; z-index: 3; }
+#wb_header	{ position: relative; z-index: 4; }
+#wb_header_placeholder { z-index: 4; }
+#wb_sbg_placeholder { position: fixed; width: 100%; top: 0; left: 0; z-index: 4; }
+#wb_header_bg { position: fixed; width: 100%; top: 0; left: 0; z-index: 4; }
+.wb_header_fixed { position: fixed!important; top: 0; width: inherit; }
+
+#wb_bgs_cont { position: absolute; width: 100%; left: 0; z-index: 3; }
+
+.wb_container .wb_page { position: relative; box-sizing: content-box; }
+.wb_container .wb_page .wb_page_anchor { position: relative; top: 0; left: 0; display: block; }
+
+.wb_sbg		{
+	position: absolute; left: 0px; top: 0px; width: 100%; height: 100%;
+	z-index: 1;
+}
+*/
+.wb_element	{
+	position: absolute !important; min-height: 64px; min-width: 64px; left: 0px; top: 0px;
+	padding: 0px; margin: 0px; display: block; overflow: visible; box-sizing: content-box;
+}
+/*
+
+
+
+
+
+
+
+.wb_sbg { background: transparent none repeat-x scroll left top; }
+body, .wb_sbg { min-width: 992px; min-height: 892px; }
+.root { width: 992px; height: 892px; overflow: visible; }
+
+
+#pendulum { left: 180px; top: -30px; min-width: 1140px; width: 1140px; min-height: 800px; height: 800px; display: block; z-index: 89; }
+#pendulum img { width: 225px; height: 605px; display: block; position: static; left: 0px; top: 0px; transform: rotate(20deg);
+}
+
+*/
+#title { left: 640px; top: 270px; min-width: 431px; width: 431px; min-height: 80px; height: 80px; display: block; z-index: -1; }
+.wb-stl-subtitle { font: normal normal 112px Helvetica,Arial,sans-serif; color: #ffffff; text-decoration: none; text-align: left; line-height: 80px; margin: 0px 0px 0px 0px; padding: 0px 0px 0px 0px; text-transform: none; }
+	
+
+#subtitle { left: 640px; top: 350px; min-width: 470px; width: 470px; min-height: 32px; height: 32px; display: block; z-index: -1; }
+.wb-stl-normal { font: normal normal 28px Helvetica,Arial,sans-serif; color: #ffffff; text-decoration: none; text-align: left; margin: 0px 0px 0px 0px; padding: 0px 0px 0px 0px; text-transform: none; }
+
+
+
+canvas {
+    border: 0;
+    background-color: transparent;
+    left: 0px; top: 0px;
+}
+
