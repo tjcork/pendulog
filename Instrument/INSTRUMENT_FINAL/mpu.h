@@ -1,3 +1,15 @@
+/*
+ * 
+ * adapted from AVRCopter project
+ * https://github.com/rpicopter/ArduinoMotionSensorExample
+ * 
+ * interfaces the MPU9250 module
+ * retrieves data
+ * converts data
+ * 
+ */
+
+
 #ifndef MPU_H
 #define MPU_H
 

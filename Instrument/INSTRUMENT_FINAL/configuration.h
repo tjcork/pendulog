@@ -1,3 +1,13 @@
+/*
+ *  Configuration class 
+ * 
+ *  stores and handles the config
+ *  updates new configurations
+ * 
+ * 
+ * 
+ */
+
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 

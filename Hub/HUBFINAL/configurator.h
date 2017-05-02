@@ -1,3 +1,9 @@
+/*
+ * Configuration class
+ * details each data field and its handling
+ * 
+ */
+
 #ifndef CONTAINERS_H
 #define CONTAINERS_H
 

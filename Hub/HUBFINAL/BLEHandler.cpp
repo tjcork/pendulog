@@ -3,9 +3,6 @@
 SoftwareSerial ble(14, 12);        //RX|TX
 
 
-
-
-
 unsigned long timeout=1000;
 
 BLEHandler::BLEHandler(Schema * d)
@@ -20,6 +17,8 @@ BLEHandler::~BLEHandler() {
 
 
 void BLEHandler::begin() {
+  //initialise HM-10
+  
   autoBaud();
   char temp[10];
 //  BLECmd(timeout,"AT+RENEW",temp,10);
@@ -35,14 +34,19 @@ void BLEHandler::begin() {
   delay(200);
     autoBaud();    
   if (!BLECmd(timeout,"AT+ROLE1",temp,10)) return;//false;
+  // master mode
   if (!BLECmd(timeout,"AT+IMME1",temp,10)) return;// false;
+  //start immediately
   if (!BLECmd(timeout,"AT+POWE2",temp,10)) return;// false;
+  //mid power
   if (!BLECmd(timeout,"AT+NOTI0",temp,10)) return;// false;
+  //no debug
   return;
 }
 
 
 bool BLEHandler::autoBaud() {
+  //automatically 
   long bauds[] = {BAUD0,BAUD3,BAUD4};  //Skip: BAUD1,BAUD2,BAUD3, // common baud rates, for HM-10 module with SoftwareSerial, try not to go over 57600
   int baudcount=sizeof(bauds)/sizeof(long);
   for(int i=0; i<baudcount; i++) {

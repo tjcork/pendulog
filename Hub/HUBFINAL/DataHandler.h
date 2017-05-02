@@ -1,3 +1,11 @@
+/*
+ * Data handler class
+ * packages and sends incoming parsed data
+ * 
+ * 
+ * 
+ */
+
 #ifndef DataHandler_H
 #define DataHandler_H
 

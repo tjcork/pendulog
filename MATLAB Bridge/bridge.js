@@ -44,27 +44,6 @@ server.on('connection', function(conn) {
 	});
 });
 
-
-
-  
-/*  
-	client.connect(4013, '127.0.0.1', function(err) {
-		dataupdate = setInterval( function() {
-			if (buffer.length > 0) {
-				var data = buffer.shift();
-				client.write(data.TM + '\t' + data.YW + '\t' + data.PT + '\t' + data.RL + '\t\n');
-			}
-		},1000/sampleFrequency);
-	});
-
-
-	client.on('close', function() {
-		clearInterval(dataupdate);
-		console.log('Connection closed');
-	});
-	*/
-
-
 });
 
 ws.on('close', function close() {
@@ -73,6 +52,8 @@ ws.on('close', function close() {
 });
 
 
+//SERIAL PORT VERSION
+// REQUIRES VIRTUAL SERIAL PORT EMULATOR
 
 /*
 var SerialPort = require('serialport');

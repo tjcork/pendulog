@@ -1,3 +1,11 @@
+/*
+ *  BLE Handler 
+ *  parses all BLE messages
+ *  manages connection
+ * 
+ * 
+ */
+
 #ifndef BLEHandler_H
 #define BLEHandler_H
 

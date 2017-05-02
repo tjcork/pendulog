@@ -1,3 +1,13 @@
+/*
+ * BLE Instrument handler
+ * 
+ * parses and handles all requests from master
+ * packages and sends all data appropriately
+ * configures ble module
+ * requests config and time 
+ * 
+ */
+
 #ifndef BLEInstrumentHandler_H
 #define BLEInstrumentHandler_H
 

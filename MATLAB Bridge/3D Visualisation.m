@@ -1,7 +1,7 @@
-%          You have to send data According to:
-%          qw(\t)qx(\t)qy(\t)qz(\t)(\n)
+%          send data According to:
+%          Time(\t)Yaw(\t)Pitch(\t)Roll(\t)(\n)
 
-function yprSphere()
+function 3dvis()
 
 close all; clear; clc;
 fprintf('waiting for connection..')
@@ -49,13 +49,6 @@ while buttonEnd==false
     yaw = a(1,2);
     pitch = a(1,3);
     roll = a(1,4);
-    %Visualize Data On Sphere Or any Other Objects
-    %[x,y,z] = sphere;h = surf(x,y,z);axis('square'); 
-
-
-%     t = hgtransform;
-%     set(h, 'Parent', t);
-%     h = t;
     %Rotate Object
     
     %Rt=makehgtform('xrotate',roll-roll_c,'yrotate',pitch-pitch_c,'zrotate',yaw-yaw_c);
@@ -65,24 +58,9 @@ while buttonEnd==false
     
     set(h,'Matrix',Rt);
 
-%     Xt=makehgtform('xrotate',(roll-roll_l)/180*pi);
-%     Yt=makehgtform('yrotate',(pitch-pitch_l)/180*pi);
-%     Zt=makehgtform('zrotate',(yaw-yaw_l)/180*pi);
-%     set(h, 'Matrix', Xt);
-%     set(h, 'Matrix', Yt);
-%     set(h, 'Matrix', Zt);
-%     
     %disp([(roll-roll_l)/180*pi (pitch-pitch_l)/180*pi (yaw-yaw_l)/180*pi]);
     %disp([yaw pitch roll]);
     disp([wrap180(yaw-yaw_l) wrap180(pitch-pitch_l) wrap180(roll-roll_l)]);
-    
-    
-    
-%     
-%     rotate(h,[1,0,0],(roll-roll_c))
-%     rotate(h,[0,1,0],(pitch-pitch_c))
-%     rotate(h,[0,0,1],(yaw-yaw_c))
-
     drawnow
 end
 

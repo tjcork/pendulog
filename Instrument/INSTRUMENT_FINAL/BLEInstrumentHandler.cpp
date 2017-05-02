@@ -1,6 +1,7 @@
 #include "BLEInstrumentHandler.h"
 
-unsigned long timeout=1000;
+
+unsigned long timeout=1000; // BLE HM-10 command timeout time
 
 void BLEInstrumentHandler::initialise() {
   
@@ -72,10 +73,9 @@ bool BLEInstrumentHandler::BLECmd(long timeout, char* command, char* temp, size_
   if(verboseoutput) Serial.println(command);
   USE_SERIAL.print(command);
   
-  // The loop below wait till either a response is received or timeout
-  // The problem with this BLE Shield is the HM-10 module does not response with CR LF at the end of the response,
-  // so a timeout is required to detect end of response and also prevent the loop locking up.
-
+  // wait till either a response is received or timeout
+  // a timeout waits until the full response could have been recieved
+  
   while(!USE_SERIAL.available()){
     if(millis()>endtime) {      // timeout, break
       found=false;
@@ -88,11 +88,10 @@ bool BLEInstrumentHandler::BLECmd(long timeout, char* command, char* temp, size_
     int i=0;
     while(USE_SERIAL.available()) {    // loop and read the data
       char a=USE_SERIAL.read();
-      // Serial.print((char)a); // Uncomment this to see raw data from BLE
       temp[i]=a;          // save data to buffer
       i++;
       if (i>=len-1) break;  // prevent buffer overflow, need to break
-      delay(1);           // give it a 2ms delay before reading next character
+      delay(1);           // give 1ms delay before next character
     }
     temp[i]=0;
     if(verboseoutput) Serial.print("BLE reply    = ");

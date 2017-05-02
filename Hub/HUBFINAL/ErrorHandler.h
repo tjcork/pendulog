@@ -1,3 +1,11 @@
+/*
+ * error packet handler
+ * re-request if lost
+ * 
+ * 
+ * 
+ */
+
 #ifndef ERROR_HANDLER_H
 #define ERROR_HANDLER_H
 

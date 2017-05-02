@@ -1,11 +1,20 @@
 /*
- * 
- *
- *
+ *      The Hub code
+ *      ============     
+ *  
+ *  
+ *      Code to be flashed to the ESP8266 running at 160MHz
+ *      
+ *      Enter wifi credentials
+ *      -> Have been removed for security
+ *      
+ *      
+ *      Author:   Tom Corkett
  * 
  */
  
 //===============================================================================
+// includes
 
 //#define ARDUINOJSON_USE_LONG_LONG 1
 
@@ -23,43 +32,35 @@
 
 
 //===============================================================================
-
-
+//defines
 
 //#define SOCKET_IO_SERVER
 #define WS_WEBSOCKET_SERVER
-
-
-#define MAX_FRAME_LENGTH (64)       // Here we define a maximum framelength to 64 bytes. Default is 256.
-#define CALLBACK_FUNCTIONS (1)
-#define HEARTBEAT_INTERVAL (20000)
-
-#define SENSORDATA_JSON_SIZE (JSON_OBJECT_SIZE(4))
-
+#define MAX_FRAME_LENGTH (64)       // maximum framelength to 64 bytes for websocket
+#define CALLBACK_FUNCTIONS (1)      // websocket definition
+#define SENSORDATA_JSON_SIZE (JSON_OBJECT_SIZE(4))    //size of JSON parse object
 #define USE_SERIAL Serial
-#define CONNECTION_TIMEOUT (10000)
-
+#define CONNECTION_TIMEOUT (10000)      // time no data has been recieved for
 #define JSON_STRING_LENGTH (250)
 
 //===============================================================================
 
 WebSocketsClient webSocket;
 
-char host[] = "178.62.89.40";
-int port = 3000;
+char host[] = "178.62.89.40";     //pendulog.ga host ip (big.cs.bris.ac.uk)
+int port = 3000;                  //borrowed port -- 80
 
-const char* ssid = XXXXX;
+const char* ssid = XXXXX;         //Wifi credentials
 const char* password = XXXXX;
 
 
 //===============================================================================
+// instances and variables
 
 bool isConnected = false;
 
 uint64_t messageTimestamp = 0;
-uint64_t heartbeatTimestamp = 0;
 uint64_t lastreply=0;
-
 
 unsigned long reqSent;
 unsigned long roundTripTime;
@@ -71,18 +72,8 @@ bool waiting = false;
 
 uint64_t timeLastReceived;
 
-//FieldIdentifiers defaultSchemaFormat[]={ID,TI,YW,PT,RL};
-
-
-//PacketType packetType;
-//PacketRecovery recovery;
-//DataPacket data;
-//DataChunk chunk;
-
 
 FieldIdentifiers defaultSchemaFormat[8]={ID,TI,YW,PT,RL,AX,AY,AZ};
-//FieldIdentifiers defaultSchemaFormat[15]={ ID, TI, YW, PT, RL, QW, QX, QY, QZ, AX, AY, AZ, GX, GY, GZ};
-
 Schema loadedSchema = Schema(8, defaultSchemaFormat);  
 
 Configuration config(&loadedSchema);
@@ -91,11 +82,9 @@ DataHandler dataHandler(&webSocket);
 
 
 //===============================================================================
+//helper function - included to make json parsing work for long long ints
 
 void str_ll(uint64_t value, char* string);
-//void createJSONString(char * JSONOutput, DataPacket& data);
-bool createSocketMessage(char* output, const char* Time,const char* Yaw,const char* Pitch,const char* Roll);
-
 
 //===============================================================================
 
@@ -122,6 +111,8 @@ void WIFI_Connect()
 //===============================================================================
 
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
+    //event callback function called everytime a websocket event occurs
+    
     uint64_t eventTime=millis();
     switch(type) {
         case WStype_DISCONNECTED:
@@ -132,12 +123,11 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
             {
               USE_SERIAL.printf("[WSc] Connected to url: %s\n",  payload);
               isConnected = true;
-              
-              #ifdef SOCKET_IO_SERVER
+                   
+#ifdef SOCKET_IO_SERVER
                 // socket.io upgrade confirmation message (required)
                 webSocket.sendTXT("5");
-              #endif
-              
+#endif             
 
             }
             break;
@@ -202,38 +192,16 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
 
             break;
           }
-        case WStype_BIN:
-            USE_SERIAL.printf("[WSc] get binary length: %u\n", length);
-            hexdump(payload, length);
-            // send data to server
-            // webSocket.sendBIN(payload, length);
-            break;
     }
 
 }
 
 //===============================================================================
 
-/*
-void createJSONString(char * JSONOutput, DataPacket& data) {
-  StaticJsonBuffer<SENSORDATA_JSON_SIZE> jsonBuffer;
-  JsonObject& JSON = jsonBuffer.createObject();
-  JSON["T"]=data.Time;
-  JSON["Y"]=data.Yaw;
-  JSON["P"]=data.Pitch;
-  JSON["R"]=data.Roll;
-  JSON.printTo(JSONOutput,JSON_STRING_LENGTH); 
-  return;
-}
-*/
-
-void createSocketMessage(char* output, const char* messageType, const char* JSONString){
-  strcpy(output, "42[\"");  strcat(output,messageType);  strcat(output,"\",");  strcat(output,JSONString);  strcat(output, "]");
-}
-
-//===============================================================================
-
 void setup() {
+    // program entry point
+    // run setup
+    
     Serial.begin(115200);
     //Serial.setDebugOutput(true);
     USE_SERIAL.setDebugOutput(true);
@@ -251,8 +219,7 @@ void setup() {
 
     //webSocket.setAuthorization("user", "Password"); // HTTP Basic Authorization
     webSocket.onEvent(webSocketEvent);
-       
-    //getTime();
+    
     Serial.println("Retrieving config..");
     while(!config.configReceived) {
       if (isConnected) {
@@ -279,38 +246,19 @@ void setup() {
 //===============================================================================
 
 void loop() {
+  // main loop
+  // pass all control to bt handler each iteration
+  
   if (bt.monitor()) {
     dataHandler.push(loadedSchema);
   }
+  
   if (bt.recovered()) {
+    //the recieved message was a re-requested message
     Serial.println("Recovered");
   }
-  
-  /*
-  if (BLEAvailable()) {
-    if (parseBLE(packetType,data,waiting)) {
-      
-    }
-    else if (!waiting) {
-      //PACKET ERROR
-      unsigned long missed=lastID+1;
-      Serial.print("PACKET ERROR:    "); Serial.println(missed);
-      requestResendPacket(missed);
-      recovery.addMissing(missed);
-      lastID=lastID+1;
-    }
-    timeLastReceived=millis();
-  }
-  */
-  /*
-  if((millis() - heartbeatTimestamp) > HEARTBEAT_INTERVAL and isConnected) {
-      heartbeatTimestamp = millis();
-      // heartbeat message
-      webSocket.sendPing();
-   } 
-   */
-
-   
+ 
+  //reconnect if WiFi lost 
   if (WiFi.status() != WL_CONNECTED) {
       WIFI_Connect();
   }
