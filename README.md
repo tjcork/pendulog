@@ -1,5 +1,6 @@
 # pendulog
 Project files for Pendulog the IoT motion logging project
+http://pendulog.ga/
 
 ## Data
 Sample data sets from tests and processing files for reading and generating plots
